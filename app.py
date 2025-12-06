@@ -59,9 +59,18 @@ uploaded_file = st.file_uploader(
     type=["csv"]
 )
 
-if uploaded_file is not None:
-    # ---------------- READ & ALIGN DATA ----------------
-    df = pd.read_csv(uploaded_file)
+st.markdown("### 📂 Upload Transaction File")
+
+uploaded_file = st.file_uploader(
+    "Upload CSV file containing transactions",
+    type=["csv"]
+)
+
+if uploaded_file is None:
+    st.info("👆 Please upload a CSV file to begin analysis.")
+    st.stop()
+
+df = pd.read_csv(uploaded_file)
 
     # Remove label column if present
     if "Class" in df.columns:
