@@ -48,7 +48,7 @@ friendly_feature_names = {
 # ---------------- LOAD MODEL ----------------
 @st.cache_resource
 def load_model():
-    return joblib.load("xgboost_model.pkl")
+    return joblib.load("xgboost_model_deploy.pkl")
 
 model = load_model()
 
