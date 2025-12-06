@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Optimized Mobile/Desktop Fraud Detection Dashboard
-Displays Fraud Label, PCA features (friendly names), Risk Probability & Risk Level
+Robust against string/NaN issues in uploaded CSV
 @author: HP
 """
 
@@ -36,7 +36,7 @@ st.markdown(
 
 # ---------------- EXPECTED FEATURES ----------------
 EXPECTED_COLUMNS = ["Time", "Amount"] + [f"V{i}" for i in range(1, 29)]
-FRIENDLY_NAMES = {f"V{i}": f"Pattern {i}" for i in range(1, 29)}
+FRIENDLY_FEATURE_NAMES = {f"V{i}": f"Pattern {i}" for i in range(1, 29)}
 
 # ---------------- LOAD MODEL ----------------
 @st.cache_resource
@@ -59,31 +59,32 @@ if uploaded_file is None:
 # ---------------- DATA PREP ----------------
 df = pd.read_csv(uploaded_file)
 
-# Strip whitespace from column names
-df.columns = df.columns.str.strip()
-
 # Drop label column if present
 if "Class" in df.columns:
     df = df.drop(columns=["Class"])
 
-# Add missing columns with default 0
+# Strip whitespace from column names (common CSV issue)
+df.columns = df.columns.str.strip()
+
+# Add missing expected columns with default 0
 for col in EXPECTED_COLUMNS:
     if col not in df.columns:
         df[col] = 0.0
 
-# Keep only expected columns and correct order
+# Keep only expected columns in correct order
 df = df[EXPECTED_COLUMNS]
 
 # Ensure all columns are numeric
-df = df.apply(pd.to_numeric, errors='coerce').fillna(0)
+for col in EXPECTED_COLUMNS:
+    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
 
 # ---------------- PREDICTION ----------------
 st.info("⏳ The system is analyzing transactions. Please wait…")
 progress = st.progress(0)
 status = st.empty()
 
-with st.spinner("🤖 Running fraud detection model..."):
-    try:
+try:
+    with st.spinner("🤖 Running fraud detection model..."):
         time.sleep(0.5)
         status.text("🔍 Step 1/4: Predicting fraud labels...")
         df["Fraud_Prediction"] = model.predict(df)
@@ -110,9 +111,9 @@ with st.spinner("🤖 Running fraud detection model..."):
         df["Risk_Level"] = df["Fraud_Probability"].apply(risk_level)
         progress.progress(100)
 
-    except Exception as e:
-        st.error(f"Prediction failed. Ensure the uploaded CSV matches the expected format. Error: {e}")
-        st.stop()
+except Exception as e:
+    st.error(f"Prediction failed. Ensure the uploaded CSV matches the expected format. Error: {e}")
+    st.stop()
 
 status.empty()
 progress.empty()
@@ -141,9 +142,9 @@ st.pyplot(fig)
 # ---------------- HIGH/MEDIUM RISK TABLE ----------------
 st.markdown("### 🔥 Medium & High-Risk Transactions")
 display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
-display_df.rename(columns=FRIENDLY_NAMES, inplace=True)
+display_df.rename(columns=FRIENDLY_FEATURE_NAMES, inplace=True)
 
-display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(FRIENDLY_NAMES.values())
+display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(FRIENDLY_FEATURE_NAMES.values())
 display_df = display_df[[c for c in display_cols if c in display_df.columns]]
 
 st.dataframe(display_df, height=400)
