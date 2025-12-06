@@ -34,36 +34,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ---------------- EXPECTED FEATURES ----------------
+EXPECTED_COLUMNS = (
+    ["Time", "Amount"] +
+    [f"V{i}" for i in range(1, 29)]
+)
+
 # ---------------- FRIENDLY PCA FEATURE NAMES ----------------
 friendly_feature_names = {
-    "V1": "Pattern 1 (unusual spending behaviour)",
-    "V2": "Pattern 2 (irregular transaction rhythm)",
-    "V3": "Pattern 3 (sudden deviation from normal behaviour)",
-    "V4": "Pattern 4 (rare deviation in spending flow)",
-    "V5": "Pattern 5 (anomalous usage pattern)",
-    "V6": "Pattern 6 (weak anomaly indicator)",
-    "V7": "Pattern 7 (moderate behavioural deviation)",
-    "V8": "Pattern 8 (suspicious transaction style)",
-    "V9": "Pattern 9 (irregular customer activity)",
-    "V10": "Pattern 10 (atypical spending signal)",
-    "V11": "Pattern 11 (behavioural fluctuation)",
-    "V12": "Pattern 12 (change in spending balance)",
-    "V13": "Pattern 13 (unusual feature blend)",
-    "V14": "Strong anomaly pattern (major deviation)",
-    "V15": "Pattern 15 (sudden behavioural shift)",
-    "V16": "Pattern 16 (distorted transaction pattern)",
-    "V17": "Pattern 17 (weak fraud signal)",
-    "V18": "Pattern 18 (rare anomaly)",
-    "V19": "Pattern 19 (latent abnormality)",
-    "V20": "Pattern 20 (small behaviour change)",
-    "V21": "Pattern 21 (hidden unusual pattern)",
-    "V22": "Pattern 22 (subtle anomaly)",
-    "V23": "Pattern 23 (weak behaviour deviation)",
-    "V24": "Pattern 24 (slight spending anomaly)",
-    "V25": "Pattern 25 (light irregularity)",
-    "V26": "Pattern 26 (rare behaviour noise)",
-    "V27": "Pattern 27 (low-level anomaly)",
-    "V28": "Pattern 28 (minor unusual pattern)"
+    f"V{i}": f"Pattern {i}" for i in range(1, 29)
 }
 
 # ---------------- LOAD MODEL ----------------
@@ -75,17 +54,28 @@ model = load_model()
 
 # ---------------- FILE UPLOAD ----------------
 st.markdown("### 📂 Upload Transaction File")
-uploaded_file = st.file_uploader("Upload CSV file containing transactions", type=["csv"])
+uploaded_file = st.file_uploader(
+    "Upload CSV file containing transactions",
+    type=["csv"]
+)
 
-if uploaded_file:
+if uploaded_file is not None:
+    # ---------------- READ & ALIGN DATA ----------------
     df = pd.read_csv(uploaded_file)
 
-    # Remove 'Class' column if present
-    if 'Class' in df.columns:
-        df = df.drop('Class', axis=1)
+    # Remove label column if present
+    if "Class" in df.columns:
+        df = df.drop(columns=["Class"])
+
+    # Add missing columns
+    for col in EXPECTED_COLUMNS:
+        if col not in df.columns:
+            df[col] = 0.0
+
+    # Enforce correct column order
+    df = df[EXPECTED_COLUMNS]
 
     st.info("⏳ The system is analyzing transactions. Please wait…")
-
 
     progress = st.progress(0)
     status = st.empty()
@@ -108,13 +98,12 @@ if uploaded_file:
         )
         progress.progress(85)
 
-        def risk_level(prob):
-            if prob < 0.3:
+        def risk_level(p):
+            if p < 0.3:
                 return "Low"
-            elif prob < 0.7:
+            elif p < 0.7:
                 return "Medium"
-            else:
-                return "High"
+            return "High"
 
         status.text("⚠️ Step 4/4: Assessing transaction risk levels...")
         df["Risk_Level"] = df["Fraud_Probability"].apply(risk_level)
@@ -122,15 +111,13 @@ if uploaded_file:
 
     status.empty()
     progress.empty()
-    st.success("✅ Analysis completed successfully! Review the results below.")
+    st.success("✅ Analysis completed successfully!")
 
     # ---------------- METRICS ----------------
     total_tx = len(df)
-    fraud_tx = df["Fraud_Prediction"].sum()
-    fraud_rate = (fraud_tx / total_tx) * 100
-    high_risk_tx = len(df[df["Risk_Level"] == "High"])
-
-    st.markdown("## 📊 Fraud Detection Summary")
+    fraud_tx = int(df["Fraud_Prediction"].sum())
+    fraud_rate = fraud_tx / total_tx * 100
+    high_risk_tx = (df["Risk_Level"] == "High").sum()
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Transactions", total_tx)
@@ -138,42 +125,32 @@ if uploaded_file:
     col3.metric("Fraud Rate (%)", f"{fraud_rate:.2f}%")
     col4.metric("High-Risk Transactions", high_risk_tx)
 
-    if high_risk_tx > 0:
-        st.warning(f"🚨 {high_risk_tx} high-risk transactions detected.")
-    else:
-        st.success("✅ No high-risk transactions detected.")
-
     # ---------------- DISTRIBUTION ----------------
     st.markdown("### ⚠️ Fraud Probability Distribution")
     fig, ax = plt.subplots(figsize=(8, 4))
-    sns.histplot(df["Fraud_Probability"], bins=30, kde=True, color="orange", ax=ax)
+    sns.histplot(df["Fraud_Probability"], bins=30, kde=True, ax=ax)
     ax.set_xlabel("Fraud Probability")
     ax.set_ylabel("Count")
     st.pyplot(fig)
 
     # ---------------- TABLE ----------------
-    st.markdown("### 🔥 Identified Transaction Risk ")
+    st.markdown("### 🔥 Medium & High-Risk Transactions")
 
     display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
 
-    rename_map = {k: v for k, v in friendly_feature_names.items() if k in display_df.columns}
+    rename_map = {
+        k: v for k, v in friendly_feature_names.items()
+        if k in display_df.columns
+    }
     display_df.rename(columns=rename_map, inplace=True)
 
-    display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(rename_map.values())
-    display_df = display_df[display_cols]
-
-    styled_df = display_df.style.applymap(
-        lambda v: "background-color:#E74C3C;color:white;font-weight:bold;"
-        if v == "High"
-        else "background-color:#F39C12;color:black;font-weight:bold;"
-        if v == "Medium"
-        else "",
-        subset=["Risk_Level"]
+    display_cols = (
+        ["Prediction_Label", "Fraud_Probability", "Risk_Level"]
+        + list(rename_map.values())
     )
 
-    st.dataframe(styled_df, height=450)
+    st.dataframe(display_df[display_cols], height=450)
 
-    # ---------------- DOWNLOAD ----------------
     st.download_button(
         "⬇️ Download Risk Transactions as CSV",
         display_df.to_csv(index=False),
