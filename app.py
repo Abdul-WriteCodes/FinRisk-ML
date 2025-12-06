@@ -36,7 +36,7 @@ st.markdown(
 
 # ---------------- EXPECTED FEATURES ----------------
 EXPECTED_COLUMNS = ["Time", "Amount"] + [f"V{i}" for i in range(1, 29)]
-friendly_feature_names = {f"V{i}": f"Pattern {i}" for i in range(1, 29)}
+FRIENDLY_NAMES = {f"V{i}": f"Pattern {i}" for i in range(1, 29)}
 
 # ---------------- LOAD MODEL ----------------
 @st.cache_resource
@@ -59,12 +59,12 @@ if uploaded_file is None:
 # ---------------- DATA PREP ----------------
 df = pd.read_csv(uploaded_file)
 
+# Strip whitespace from column names
+df.columns = df.columns.str.strip()
+
 # Drop label column if present
 if "Class" in df.columns:
     df = df.drop(columns=["Class"])
-
-# Strip whitespace from column names (common CSV issue)
-df.columns = df.columns.str.strip()
 
 # Add missing columns with default 0
 for col in EXPECTED_COLUMNS:
@@ -83,31 +83,36 @@ progress = st.progress(0)
 status = st.empty()
 
 with st.spinner("🤖 Running fraud detection model..."):
-    time.sleep(0.5)
-    status.text("🔍 Step 1/4: Predicting fraud labels...")
-    df["Fraud_Prediction"] = model.predict(df)
-    progress.progress(35)
+    try:
+        time.sleep(0.5)
+        status.text("🔍 Step 1/4: Predicting fraud labels...")
+        df["Fraud_Prediction"] = model.predict(df)
+        progress.progress(35)
 
-    time.sleep(0.5)
-    status.text("📊 Step 2/4: Calculating fraud probabilities...")
-    df["Fraud_Probability"] = model.predict_proba(df)[:, 1]
-    progress.progress(65)
+        time.sleep(0.5)
+        status.text("📊 Step 2/4: Calculating fraud probabilities...")
+        df["Fraud_Probability"] = model.predict_proba(df)[:, 1]
+        progress.progress(65)
 
-    time.sleep(0.5)
-    status.text("🏷️ Step 3/4: Assigning fraud labels...")
-    df["Prediction_Label"] = df["Fraud_Prediction"].map({1: "Fraudulent", 0: "Non-Fraudulent"})
-    progress.progress(85)
+        time.sleep(0.5)
+        status.text("🏷️ Step 3/4: Assigning fraud labels...")
+        df["Prediction_Label"] = df["Fraud_Prediction"].map({1: "Fraudulent", 0: "Non-Fraudulent"})
+        progress.progress(85)
 
-    def risk_level(prob):
-        if prob < 0.3:
-            return "Low"
-        elif prob < 0.7:
-            return "Medium"
-        return "High"
+        def risk_level(p):
+            if p < 0.3:
+                return "Low"
+            elif p < 0.7:
+                return "Medium"
+            return "High"
 
-    status.text("⚠️ Step 4/4: Assessing transaction risk levels...")
-    df["Risk_Level"] = df["Fraud_Probability"].apply(risk_level)
-    progress.progress(100)
+        status.text("⚠️ Step 4/4: Assessing transaction risk levels...")
+        df["Risk_Level"] = df["Fraud_Probability"].apply(risk_level)
+        progress.progress(100)
+
+    except Exception as e:
+        st.error(f"Prediction failed. Ensure the uploaded CSV matches the expected format. Error: {e}")
+        st.stop()
 
 status.empty()
 progress.empty()
@@ -136,9 +141,9 @@ st.pyplot(fig)
 # ---------------- HIGH/MEDIUM RISK TABLE ----------------
 st.markdown("### 🔥 Medium & High-Risk Transactions")
 display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
-display_df.rename(columns=friendly_feature_names, inplace=True)
+display_df.rename(columns=FRIENDLY_NAMES, inplace=True)
 
-display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(friendly_feature_names.values())
+display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(FRIENDLY_NAMES.values())
 display_df = display_df[[c for c in display_cols if c in display_df.columns]]
 
 st.dataframe(display_df, height=400)
