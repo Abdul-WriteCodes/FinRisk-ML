@@ -140,6 +140,7 @@ if uploaded_file:
         st.success("✅ No high-risk transactions detected.")
 
     # ---------------- DISTRIBUTION ----------------
+    st.markdown("---")
     st.markdown("### ⚠️ Fraud Probability Distribution")
     fig, ax = plt.subplots(figsize=(8, 4))
     sns.histplot(df["Fraud_Probability"], bins=30, kde=True, color="orange", ax=ax)
@@ -148,6 +149,7 @@ if uploaded_file:
     st.pyplot(fig)
 
     # ---------------- TABLE ----------------
+    st.markdown("---")
     st.markdown("### 🔥 Identified Transaction Risk ")
 
     display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
