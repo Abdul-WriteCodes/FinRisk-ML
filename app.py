@@ -36,7 +36,38 @@ st.markdown(
 
 # ---------------- EXPECTED FEATURES ----------------
 EXPECTED_COLUMNS = ["Time", "Amount"] + [f"V{i}" for i in range(1, 29)]
-FRIENDLY_FEATURE_NAMES = {f"V{i}": f"Pattern {i}" for i in range(1, 29)}
+
+# ✅ UPDATED: Friendly descriptive PCA feature names
+FRIENDLY_FEATURE_NAMES = {
+    "V1": "Pattern 1 (unusual spending behaviour)",
+    "V2": "Pattern 2 (irregular transaction rhythm)",
+    "V3": "Pattern 3 (sudden deviation from normal behaviour)",
+    "V4": "Pattern 4 (rare deviation in spending flow)",
+    "V5": "Pattern 5 (anomalous usage pattern)",
+    "V6": "Pattern 6 (weak anomaly indicator)",
+    "V7": "Pattern 7 (moderate behavioural deviation)",
+    "V8": "Pattern 8 (suspicious transaction style)",
+    "V9": "Pattern 9 (irregular customer activity)",
+    "V10": "Pattern 10 (atypical spending signal)",
+    "V11": "Pattern 11 (behavioural fluctuation)",
+    "V12": "Pattern 12 (change in spending balance)",
+    "V13": "Pattern 13 (unusual feature blend)",
+    "V14": "Strong anomaly pattern (major deviation)",
+    "V15": "Pattern 15 (sudden behavioural shift)",
+    "V16": "Pattern 16 (distorted transaction pattern)",
+    "V17": "Pattern 17 (weak fraud signal)",
+    "V18": "Pattern 18 (rare anomaly)",
+    "V19": "Pattern 19 (latent abnormality)",
+    "V20": "Pattern 20 (small behaviour change)",
+    "V21": "Pattern 21 (hidden unusual pattern)",
+    "V22": "Pattern 22 (subtle anomaly)",
+    "V23": "Pattern 23 (weak behaviour deviation)",
+    "V24": "Pattern 24 (slight spending anomaly)",
+    "V25": "Pattern 25 (light irregularity)",
+    "V26": "Pattern 26 (rare behaviour noise)",
+    "V27": "Pattern 27 (low-level anomaly)",
+    "V28": "Pattern 28 (minor unusual pattern)",
+}
 
 # ---------------- LOAD MODEL ----------------
 @st.cache_resource
@@ -53,30 +84,24 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is None:
-    st.info("👆 Please upload a CSV file to begin analysis.")
     st.stop()
 
 # ---------------- DATA PREP ----------------
 df = pd.read_csv(uploaded_file)
 
-# Drop label column if present
 if "Class" in df.columns:
     df = df.drop(columns=["Class"])
 
-# Strip whitespace from column names (common CSV issue)
 df.columns = df.columns.str.strip()
 
-# Add missing expected columns with default 0
 for col in EXPECTED_COLUMNS:
     if col not in df.columns:
         df[col] = 0.0
 
-# Keep only expected columns in correct order
 df = df[EXPECTED_COLUMNS]
 
-# Ensure all columns are numeric
 for col in EXPECTED_COLUMNS:
-    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
+    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
 # ---------------- PREDICTION ----------------
 st.info("⏳ The system is analyzing transactions. Please wait…")
@@ -97,7 +122,9 @@ try:
 
         time.sleep(0.5)
         status.text("🏷️ Step 3/4: Assigning fraud labels...")
-        df["Prediction_Label"] = df["Fraud_Prediction"].map({1: "Fraudulent", 0: "Non-Fraudulent"})
+        df["Prediction_Label"] = df["Fraud_Prediction"].map(
+            {1: "Fraudulent", 0: "Non-Fraudulent"}
+        )
         progress.progress(85)
 
         def risk_level(p):
@@ -141,13 +168,27 @@ st.pyplot(fig)
 
 # ---------------- HIGH/MEDIUM RISK TABLE ----------------
 st.markdown("### 🔥 Medium & High-Risk Transactions")
-display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
-display_df.rename(columns=FRIENDLY_FEATURE_NAMES, inplace=True)
 
-display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(FRIENDLY_FEATURE_NAMES.values())
+display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
+
+rename_map = {k: v for k, v in FRIENDLY_FEATURE_NAMES.items() if k in display_df.columns}
+display_df.rename(columns=rename_map, inplace=True)
+
+display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(rename_map.values())
 display_df = display_df[[c for c in display_cols if c in display_df.columns]]
 
-st.dataframe(display_df, height=400)
+styled_df = display_df.style.applymap(
+    lambda v: (
+        "background-color:#E74C3C;color:white;font-weight:bold;"
+        if v == "High"
+        else "background-color:#F39C12;color:black;font-weight:bold;"
+        if v == "Medium"
+        else ""
+    ),
+    subset=["Risk_Level"]
+)
+
+st.dataframe(styled_df, height=400)
 
 # ---------------- DOWNLOAD ----------------
 st.download_button(
