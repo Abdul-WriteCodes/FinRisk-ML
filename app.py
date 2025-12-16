@@ -84,7 +84,7 @@ uploaded_file = st.file_uploader("Upload CSV file containing transactions", type
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    
+
     st.info("⏳ The system is analyzing transactions. Please wait…")
 
 
@@ -102,7 +102,7 @@ if uploaded_file:
         df["Fraud_Probability"] = model.predict_proba(df)[:, 1]
         progress.progress(65)
 
-        
+        time.sleep(0.5)
         status.text("🏷️ Step 3/4: Assigning fraud labels...")
         df["Prediction_Label"] = df["Fraud_Prediction"].map(
             {1: "Fraudulent", 0: "Non-Fraudulent"}
