@@ -185,7 +185,8 @@ st.markdown(
     """
     <div style='text-align:center; font-size:13px; color:gray;'>
         🔒 This system does not store uploaded data<br>
-        © 2025 Automated Fraud Detection System
+        🔬Learn more about Developer: <a href="https://abdul-writecodes.github.io/abprt/index.html" target="_blank">Abdul</a><br>
+        © 2025
     </div>
     """,
     unsafe_allow_html=True
