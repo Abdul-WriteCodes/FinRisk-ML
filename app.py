@@ -182,10 +182,12 @@ if uploaded_file:
 # ---------------- FOOTER ----------------
 st.markdown("---")
 st.markdown("""
-   <div style="text-align: center; font-size: 0.85em; color: gray; line-height: 1.6em;">
-    <strong>FinRisk-ML</strong>: Designed and Developed for use in <strong>Fintech and E-commerce payment platforms</strong><br>
-    🔬Learn more about Developer: <a href="https://abdul-writecodes.github.io/abprt/index.html" target="_blank">Abdul</a><br>
-    <strong>Disclaimer:</strong> This system does not collect or store any information <br>
+<div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
+    <strong>FinRisk-ML</strong> — An Automated Machine Learning System for 
+    <strong>FinTech & E-commerce Payment Risk Analysis</strong><br>
+    🔬 Developed by <a href="https://abdul-writecodes.github.io/abprt/index.html" target="_blank" style="text-decoration:none;">
+    Abdul Write & Codes</a><br>
+    <strong>Disclaimer:</strong> This application does not collect, process, or store any personal or financial data.<br>
     © 2025 Abdul Write & Codes. All rights reserved.
 </div>
 """, unsafe_allow_html=True)
