@@ -190,8 +190,8 @@ st.markdown("""
 <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
     <strong>FinRisk-ML</strong> — An Automated Machine Learning System for 
     <strong>FinTech & E-commerce Payment Risk Analysis</strong><br>
-    🔬 Developed by <a href="https://abdul-writecodes.github.io/abprt/index.html" target="_blank" style="text-decoration:none;">
-    Abdul Write & Codes</a><br>
+    🔬 Learn More About Developer by <a href="https://abdul-writecodes.github.io/abprt/index.html" target="_blank" style="text-decoration:none;">
+    Abdul </a><br>
     <strong>Disclaimer:</strong> This application does not collect, process, or store any personal or financial data.<br>
     © 2025 Abdul Write & Codes. All rights reserved.
 </div>
