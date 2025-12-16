@@ -22,9 +22,9 @@ st.set_page_config(
 st.markdown(
     """
     <div style='text-align: center;'>
-        <h1>💳 Automated Financial Fraud Detection System</h1>
+        <h1> FinRisk-ML</h1>
         <p style='font-size:16px; color:gray;'>
-            Real-time Credit Card Transaction Fraud Detection powered by XGBoost
+            A Machine Learning-powered Automated Intelligent System that Identify and Classify Fraudulent Credit Card Transactions 💳
         </p>
         <p style='font-size:14px; color:#2ECC71;'>
             ✅ Secure • ✅ Private • ✅ No data is stored
