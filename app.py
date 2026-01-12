@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Optimized Mobile/Desktop Fraud Detection Dashboard
-Displays Fraud Label, PCA features (friendly names), Risk Probability and Risk Level
+FinRisk-ML | Intelligent Fraud Detection Dashboard
+Sidebar-driven controls with immersive analytics view
 """
 
 import streamlit as st
@@ -18,12 +18,13 @@ st.set_page_config(
     page_icon="💳"
 )
 
+# ---------------- HEADER ----------------
 st.markdown(
     """
-    <div style='text-align: center;'>
-        <h1> FinRisk-ML</h1>
+    <div style='text-align:center;'>
+        <h1>💳 FinRisk-ML</h1>
         <p style='font-size:16px; color:gray;'>
-            A Machine Learning-powered Automated Intelligent System that Identify and Classify Fraudulent Credit Card Transactions 💳
+            A Machine Learning-powered Automated System for Credit Card Fraud Detection
         </p>
         <p style='font-size:14px; color:#2ECC71;'>
             ✅ Secure • ✅ Private • ✅ No data is stored
@@ -77,56 +78,76 @@ model = load_model()
 def load_csv(file):
     return pd.read_csv(file)
 
-# ---------------- FILE UPLOAD ----------------
-st.markdown("### 📂 Upload Transaction File")
+# ======================================================
+# SIDEBAR — CONTROL PLANE
+# ======================================================
+with st.sidebar:
+    st.markdown("## ⚙️ Control Panel")
 
-uploaded_file = st.file_uploader(
-    "Upload CSV file containing transactions",
-    type=["csv"]
-)
-
-analyse_clicked = False
-
-if uploaded_file is not None:
-    df = load_csv(uploaded_file)
-    st.session_state["uploaded_df"] = df
-
-    st.success("✅ File uploaded successfully")
-    st.markdown("#### 👀 Data Preview")
-    st.dataframe(df.head(), use_container_width=True)
-
-    analyse_clicked = st.button(
-        "🚀 Analyse Transactions",
-        type="primary",
-        use_container_width=True
+    uploaded_file = st.file_uploader(
+        "📂 Upload Transaction CSV",
+        type=["csv"]
     )
 
-# ---------------- RUN ANALYSIS ONLY ON BUTTON CLICK ----------------
-if analyse_clicked and "uploaded_df" in st.session_state:
-    df = st.session_state["uploaded_df"].copy()
+    if uploaded_file:
+        df = load_csv(uploaded_file)
+        st.session_state["uploaded_df"] = df
+        st.success("File loaded successfully")
+        st.caption(f"Rows: {df.shape[0]} | Columns: {df.shape[1]}")
 
-    st.info("⏳ The system is analyzing transactions. Please wait…")
+    analyse_clicked = st.button(
+        "🚀 Run Fraud Analysis",
+        type="primary",
+        use_container_width=True,
+        disabled=("uploaded_df" not in st.session_state)
+    )
+
+    if st.button("🔄 Reset Application", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+    st.markdown("---")
+    st.markdown("### ℹ️ Model Information")
+    st.caption("• Algorithm: XGBoost")
+    st.caption("• Output: Fraud Probability")
+    st.caption("• Risk Levels: Low / Medium / High")
+
+# ======================================================
+# MAIN CANVAS — INSIGHT PLANE
+# ======================================================
+if "uploaded_df" not in st.session_state:
+    st.info("👈 Upload a CSV file from the sidebar to begin analysis.")
+    st.stop()
+
+df = st.session_state["uploaded_df"]
+
+# ---------------- DATA PREVIEW ----------------
+with st.expander("👀 Preview Uploaded Data", expanded=False):
+    st.dataframe(df.head(), use_container_width=True)
+
+# ---------------- RUN ANALYSIS ----------------
+if analyse_clicked:
+    st.markdown("## 🔍 Fraud Analysis Overview")
 
     progress = st.progress(0)
     status = st.empty()
 
-    with st.spinner("🤖 Running fraud detection model..."):
-        time.sleep(0.5)
-        status.text("🔍 Step 1/4: Predicting fraud labels...")
+    with st.spinner("🤖 Running fraud detection engine..."):
+        time.sleep(0.4)
+        status.text("Step 1/4: Predicting fraud labels")
         df["Fraud_Prediction"] = model.predict(df)
-        progress.progress(35)
+        progress.progress(30)
 
-        time.sleep(0.5)
-        status.text("📊 Step 2/4: Calculating fraud probabilities...")
+        time.sleep(0.4)
+        status.text("Step 2/4: Calculating fraud probabilities")
         df["Fraud_Probability"] = model.predict_proba(df)[:, 1]
-        progress.progress(65)
+        progress.progress(60)
 
-        time.sleep(0.5)
-        status.text("🏷️ Step 3/4: Assigning fraud labels...")
+        status.text("Step 3/4: Assigning prediction labels")
         df["Prediction_Label"] = df["Fraud_Prediction"].map(
             {1: "Fraudulent", 0: "Non-Fraudulent"}
         )
-        progress.progress(85)
+        progress.progress(80)
 
         def risk_level(prob):
             if prob < 0.3:
@@ -136,57 +157,65 @@ if analyse_clicked and "uploaded_df" in st.session_state:
             else:
                 return "High"
 
-        status.text("⚠️ Step 4/4: Assessing transaction risk levels...")
+        status.text("Step 4/4: Assessing transaction risk levels")
         df["Risk_Level"] = df["Fraud_Probability"].apply(risk_level)
         progress.progress(100)
 
-    status.empty()
     progress.empty()
-
-    st.success("✅ Analysis completed successfully!")
+    status.empty()
+    st.success("✅ Fraud analysis completed successfully")
 
     # ---------------- METRICS ----------------
+    st.markdown("### 📊 Key Risk Indicators")
+
     total_tx = len(df)
     fraud_tx = int(df["Fraud_Prediction"].sum())
-    fraud_rate = (fraud_tx / total_tx) * 100
-    high_risk_tx = len(df[df["Risk_Level"] == "High"])
+    fraud_rate = fraud_tx / total_tx * 100
+    high_risk_tx = (df["Risk_Level"] == "High").sum()
 
-    st.markdown("## 📊 Fraud Detection Summary")
-
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Transactions", total_tx)
-    col2.metric("Detected Frauds", fraud_tx)
-    col3.metric("Fraud Rate (%)", f"{fraud_rate:.2f}%")
-    col4.metric("High-Risk Transactions", high_risk_tx)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Total Transactions", total_tx)
+    c2.metric("Detected Frauds", fraud_tx)
+    c3.metric("Fraud Rate", f"{fraud_rate:.2f}%")
+    c4.metric("High-Risk Transactions", high_risk_tx)
 
     # ---------------- DISTRIBUTION ----------------
     st.markdown("---")
     st.markdown("### ⚠️ Fraud Probability Distribution")
 
-    fig, ax = plt.subplots(figsize=(8, 4))
+    fig, ax = plt.subplots(figsize=(9, 4))
     sns.histplot(df["Fraud_Probability"], bins=30, kde=True, ax=ax)
     ax.set_xlabel("Fraud Probability")
-    ax.set_ylabel("Count")
+    ax.set_ylabel("Transaction Count")
     st.pyplot(fig)
 
-    # ---------------- TABLE ----------------
+    # ---------------- HIGH-RISK TABLE ----------------
     st.markdown("---")
-    st.markdown("### 🔥 Identified Transaction Risk")
+    st.markdown("### 🔥 Medium & High-Risk Transactions")
 
     display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
 
-    rename_map = {k: v for k, v in friendly_feature_names.items() if k in display_df.columns}
+    # Apply friendly PCA names ONLY for display
+    rename_map = {
+        k: v for k, v in friendly_feature_names.items()
+        if k in display_df.columns
+    }
     display_df.rename(columns=rename_map, inplace=True)
 
-    display_cols = ["Prediction_Label", "Fraud_Probability", "Risk_Level"] + list(rename_map.values())
+    display_cols = (
+        ["Prediction_Label", "Fraud_Probability", "Risk_Level"]
+        + list(rename_map.values())
+    )
     display_df = display_df[display_cols]
 
     styled_df = display_df.style.applymap(
-        lambda v: "background-color:#E74C3C;color:white;font-weight:bold;"
-        if v == "High"
-        else "background-color:#F39C12;color:black;font-weight:bold;"
-        if v == "Medium"
-        else "",
+        lambda v: (
+            "background-color:#E74C3C;color:white;font-weight:bold;"
+            if v == "High"
+            else "background-color:#F39C12;color:black;font-weight:bold;"
+            if v == "Medium"
+            else ""
+        ),
         subset=["Risk_Level"]
     )
 
@@ -196,8 +225,8 @@ if analyse_clicked and "uploaded_df" in st.session_state:
     st.download_button(
         "⬇️ Download Risk Transactions as CSV",
         display_df.to_csv(index=False),
-        "fraud_risk_transactions.csv",
-        "text/csv"
+        file_name="fraud_risk_transactions.csv",
+        mime="text/csv"
     )
 
 # ---------------- FOOTER ----------------
