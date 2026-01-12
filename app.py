@@ -78,9 +78,9 @@ model = load_model()
 def load_csv(file):
     return pd.read_csv(file)
 
-# ======================================================
+
 # SIDEBAR — CONTROL PLANE
-# ======================================================
+
 with st.sidebar:
     st.markdown("## ⚙️ Control Panel")
 
@@ -111,10 +111,26 @@ with st.sidebar:
     st.caption("• Algorithm: XGBoost")
     st.caption("• Output: Fraud Probability")
     st.caption("• Risk Levels: Low / Medium / High")
+    
+    # ---------------- Dummy Data Link ----------------
+    st.markdown("---")
+    st.markdown("### ℹ️ Get Dummy Data Here")
+    st.markdown(
+        """
+        <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
+            🔬 Get Data Here:
+            <a href="https://app.box.com/s/yih10tldxgnagreecb0hlicnph8d2h6l/" target="_blank">
+         
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
 
-# ======================================================
+
 # MAIN CANVAS — INSIGHT PLANE
-# ======================================================
+
 if "uploaded_df" not in st.session_state:
     st.info("👈 Upload a CSV file from the sidebar to begin analysis.")
     st.stop()
