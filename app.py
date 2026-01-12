@@ -2,7 +2,6 @@
 """
 Optimized Mobile/Desktop Fraud Detection Dashboard
 Displays Fraud Label, PCA features (friendly names), Risk Probability & Risk Level
-@author: HP
 """
 
 import streamlit as st
@@ -73,20 +72,40 @@ def load_model():
 
 model = load_model()
 
-# ---------------- LOAD CSV (CACHED) ----------------
+# ---------------- LOAD CSV ----------------
 @st.cache_data(show_spinner=False)
 def load_csv(file):
     return pd.read_csv(file)
 
 # ---------------- FILE UPLOAD ----------------
 st.markdown("### 📂 Upload Transaction File")
-uploaded_file = st.file_uploader("Upload CSV file containing transactions", type=["csv"])
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+uploaded_file = st.file_uploader(
+    "Upload CSV file containing transactions",
+    type=["csv"]
+)
+
+analyse_clicked = False
+
+if uploaded_file is not None:
+    df = load_csv(uploaded_file)
+    st.session_state["uploaded_df"] = df
+
+    st.success("✅ File uploaded successfully")
+    st.markdown("#### 👀 Data Preview")
+    st.dataframe(df.head(), use_container_width=True)
+
+    analyse_clicked = st.button(
+        "🚀 Analyse Transactions",
+        type="primary",
+        use_container_width=True
+    )
+
+# ---------------- RUN ANALYSIS ONLY ON BUTTON CLICK ----------------
+if analyse_clicked and "uploaded_df" in st.session_state:
+    df = st.session_state["uploaded_df"].copy()
 
     st.info("⏳ The system is analyzing transactions. Please wait…")
-
 
     progress = st.progress(0)
     status = st.empty()
@@ -123,11 +142,12 @@ if uploaded_file:
 
     status.empty()
     progress.empty()
-    st.success("✅ Analysis completed successfully! Review the results below.")
+
+    st.success("✅ Analysis completed successfully!")
 
     # ---------------- METRICS ----------------
     total_tx = len(df)
-    fraud_tx = df["Fraud_Prediction"].sum()
+    fraud_tx = int(df["Fraud_Prediction"].sum())
     fraud_rate = (fraud_tx / total_tx) * 100
     high_risk_tx = len(df[df["Risk_Level"] == "High"])
 
@@ -139,23 +159,19 @@ if uploaded_file:
     col3.metric("Fraud Rate (%)", f"{fraud_rate:.2f}%")
     col4.metric("High-Risk Transactions", high_risk_tx)
 
-    if high_risk_tx > 0:
-        st.warning(f"🚨 {high_risk_tx} high-risk transactions detected.")
-    else:
-        st.success("✅ No high-risk transactions detected.")
-
     # ---------------- DISTRIBUTION ----------------
     st.markdown("---")
     st.markdown("### ⚠️ Fraud Probability Distribution")
+
     fig, ax = plt.subplots(figsize=(8, 4))
-    sns.histplot(df["Fraud_Probability"], bins=30, kde=True, color="orange", ax=ax)
+    sns.histplot(df["Fraud_Probability"], bins=30, kde=True, ax=ax)
     ax.set_xlabel("Fraud Probability")
     ax.set_ylabel("Count")
     st.pyplot(fig)
 
     # ---------------- TABLE ----------------
     st.markdown("---")
-    st.markdown("### 🔥 Identified Transaction Risk ")
+    st.markdown("### 🔥 Identified Transaction Risk")
 
     display_df = df[df["Risk_Level"].isin(["Medium", "High"])].copy()
 
@@ -174,7 +190,7 @@ if uploaded_file:
         subset=["Risk_Level"]
     )
 
-    st.dataframe(styled_df, height=450)
+    st.dataframe(styled_df, height=450, use_container_width=True)
 
     # ---------------- DOWNLOAD ----------------
     st.download_button(
@@ -186,13 +202,18 @@ if uploaded_file:
 
 # ---------------- FOOTER ----------------
 st.markdown("---")
-st.markdown("""
-<div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
-    <strong>FinRisk-ML</strong> — An Automated Machine Learning System for 
-    <strong>FinTech & E-commerce Payment Risk Analysis</strong><br>
-    🔬 Learn More About Developer by <a href="https://abdul-writecodes.github.io/portfolio/" target="_blank" style="text-decoration:none;">
-    Abdul </a><br>
-    <strong>Disclaimer:</strong> This application does not collect, process, or store any personal or financial data.<br>
-    © 2025 Abdul Write & Codes. All rights reserved.
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
+        <strong>FinRisk-ML</strong> — An Automated Machine Learning System for 
+        <strong>FinTech & E-commerce Payment Risk Analysis</strong><br>
+        🔬 Learn More About Developer by 
+        <a href="https://abdul-writecodes.github.io/portfolio/" target="_blank">
+            Abdul
+        </a><br>
+        <strong>Disclaimer:</strong> This application does not collect, process, or store any personal or financial data.<br>
+        © 2025 Abdul Write & Codes. All rights reserved.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
