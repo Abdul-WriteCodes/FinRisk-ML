@@ -112,7 +112,7 @@ with st.sidebar:
     st.caption("• Output: Fraud Probability")
     st.caption("• Risk Levels: Low / Medium / High")
     
-    # ---------------- Dummy Data Link ----------------
+    # ---------------- Dummy Data ----------------
     st.markdown("---")
     st.markdown("### ℹ️ Get Dummy Data Here")
     st.markdown(
