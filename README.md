@@ -33,6 +33,7 @@ CaptAI is designed for use in:
 
 1. **Launch the application**
 2. Upload creditcard transaction dataset as CSV file:
+👉 **[Get Dummy Dataset Here](https://app.box.com/s/yih10tldxgnagreecb0hlicnph8d2h6l)**
 3. Enter a movie review text (maximum of **200 words**)
 4. Wait for Analysis
 5. View the results:
