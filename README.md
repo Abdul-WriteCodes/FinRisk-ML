@@ -1,48 +1,65 @@
-# 📘 Development of Web-based Machine Learning System for Real-time Financial Fraud Detection
+# Finrisk-ML
 
-This project builds a AI Credit Card Fraud Detection that uses  Machine Learning Algorithm  for inference  and Web Development Framework  for end user interaction.
-
-<p align="center">
-	<img src="assets/Finrisk.png" alt="Project Overview" style="width:100%; max-width:800px;" />
-</p>
+**FinRisk-ML** is an intelligent system analysis system powered by **an esemble machine learning model** trained on a **284,807 credit card transactions dataset**.  
+It enables users in e-commerce and fintech environment to automatically analyze transaction data, classifying them as **Fraudulent** or **Non-fraudulent** and highlighting risks with high confidence and interpretability.
 
 ---
 
-## 🧠 Model Overview
+<p align="center">
+  <img src="assets/finrisk.png" alt="FinRisk-MLLogo" style="width:100%; max-width:800px;" />
+</p>
+---
+## 🚀 Key Features
 
-- **Models Used:**
-  - `LogisticRegression``  
-  - `LightGBM` 
-  - `RandomForest` 
-  - `xgboost` 
-  
-- **Text Processing:**  `SMOTE Technique
-- **Train/Test Split:** 80/20
+- Automated Transaction Risk Analysis:
+  - **XGBoost**
+- Number of Fraudulent risk label in transaction data
+- Automatic fraudulent risk result visualization
+- Clean and interactive Streamlit interface
 
 ---
 
-## 🔢 Confusion Matrix
-The confusion matrix displays the count of true positives, true negatives, false positives, and false negatives, giving insight into how well the model is classifying each class
-<p align="center">
-	<img src="assets/ConfusionMatrix.png" alt="ConfusionMatrix" style="width:100%; max-width:800px;" />
-</p>
+## 🧠 Use Case
+
+CaptAI is designed for use in:
+- Fintech environment
+- e-commerce environment
+- Risk probability analysis
+
 
 ---
 
-## 📈 ROC Curve
-AUC values closer to 1.0 suggest the model can correctly rank positive instances higher than negative ones across a wide range of thresholds, reflecting robust classification performance
-<p align="center">
-	<img src="assets/ROC_curves.png" alt="ROC_curves" style="width:100%; max-width:800px;" />
-</p>
+## 🛠️ How to Use FinkRisk-ML
+
+1. **Launch the application**
+2. Upload creditcard transaction dataset as CSV file:
+3. Enter a movie review text (maximum of **200 words**)
+4. Wait for Analysis
+5. View the results:
+   - Predicted transaction risk (*Fraudulent* or *Non-fraudulent*)
+   - Visualised risk level label for transactions
+   
 
 ---
-## 🎯 Precision-Recall Curve
-
-The high AUC score indicates that the model achieves a strong trade-off between precision and recall, demonstrating effective discrimination between positive and negative reviews
-<p align="center">
-	<img src="assets/PrecisionRecall.png" alt="PrecisionRecall" style="width:100%; max-width:800px;" />
-</p>
 
 
+## 🔗 Live System
 
+👉 **[Try the Live App Here](https://finrisk-ml.streamlit.app/)**
 
+---
+
+## 🧩 Technologies Used
+
+- Python
+- Scikit-learn
+- Natural Language Processing (NLP)
+- Streamlit
+- IMDb Movie Reviews Dataset
+
+---
+
+## 👤 Developer
+
+**Anafi Abdul-Azeez Olohunjuwon**  
+AI/ML & LLM Developer | Research Writer
