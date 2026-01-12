@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Optimized Mobile/Desktop Fraud Detection Dashboard
-Displays Fraud Label, PCA features (friendly names), Risk Probability & Risk Level
+Displays Fraud Label, PCA features (friendly names), Risk Probability and Risk Level
 """
 
 import streamlit as st
@@ -92,8 +92,8 @@ if uploaded_file is not None:
     st.session_state["uploaded_df"] = df
 
     st.success("✅ File uploaded successfully")
-    #st.markdown("#### 👀 Data Preview")
-    #st.dataframe(df.head(), use_container_width=True)
+    st.markdown("#### 👀 Data Preview")
+    st.dataframe(df.head(), use_container_width=True)
 
     analyse_clicked = st.button(
         "🚀 Analyse Transactions",
