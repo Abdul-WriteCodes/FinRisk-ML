@@ -6,7 +6,7 @@ It enables users in e-commerce and fintech environment to automatically analyze 
 ---
 
 <p align="center">
-  <img src="assets/finrisk.PNG" alt="FinRisk-MLLogo" style="width:100%; max-width:800px;" />
+  <img src="assets/Finrisk.png" alt="FinRisk-MLLogo" style="width:100%; max-width:800px;" />
 </p>
 ---
 ## 🚀 Key Features
