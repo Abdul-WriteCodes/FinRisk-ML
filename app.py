@@ -120,6 +120,7 @@ with st.sidebar:
         <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
             🔬 Get Data Here:
             <a href="https://app.box.com/s/yih10tldxgnagreecb0hlicnph8d2h6l/" target="_blank">
+            Data
          
             </a>
         </div>
