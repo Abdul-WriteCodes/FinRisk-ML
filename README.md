@@ -6,7 +6,7 @@ It enables users in e-commerce and fintech environment to automatically analyze 
 ---
 
 <p align="center">
-  <img src="assets/finrisk.png" alt="FinRisk-MLLogo" style="width:100%; max-width:800px;" />
+  <img src="assets/finrisk.PNG" alt="FinRisk-MLLogo" style="width:100%; max-width:800px;" />
 </p>
 ---
 ## 🚀 Key Features
@@ -53,9 +53,9 @@ CaptAI is designed for use in:
 
 - Python
 - Scikit-learn
-- Natural Language Processing (NLP)
+- XGBoost
 - Streamlit
-- IMDb Movie Reviews Dataset
+- European Credit card fraud dataset
 
 ---
 
