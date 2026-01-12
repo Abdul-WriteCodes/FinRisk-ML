@@ -112,20 +112,20 @@ with st.sidebar:
     st.caption("• Output: Fraud Probability")
     st.caption("• Risk Levels: Low / Medium / High")
     
-   # ---------------- Dummy Data Link ----------------
-st.markdown("---")
-st.markdown("### ℹ️ Get Dummy Data Here")
-st.markdown(
-    """
-    <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
-        🔬 Get Dummy Data: 
-        <a href="https://app.box.com/s/yih10tldxgnagreecb0hlicnph8d2h6l" target="_blank">
-            Download
-        </a>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+       # ---------------- Dummy Data Link ----------------
+    st.markdown("---")
+    st.markdown("### ℹ️ Get Dummy Data Here")
+    st.markdown(
+        """
+        <div style="text-align: center; font-size: 0.85em; color: #8a8a8a; line-height: 1.7em;">
+            🔬 Get Dummy Data: 
+            <a href="https://app.box.com/s/yih10tldxgnagreecb0hlicnph8d2h6l" target="_blank">
+                Download
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     
 
